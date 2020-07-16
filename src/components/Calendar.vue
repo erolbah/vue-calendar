@@ -161,16 +161,16 @@ export default {
         },
         showEvent ({ nativeEvent, event }) {
             const open = () => {
-            this.selectedEvent = event
-            this.selectedElement = nativeEvent.target
-            setTimeout(() => this.selectedOpen = true, 10)
+                this.selectedEvent = event
+                this.selectedElement = nativeEvent.target
+                setTimeout(() => this.selectedOpen = true, 10)
             }
 
             if (this.selectedOpen) {
-            this.selectedOpen = false
-            setTimeout(open, 10)
+                this.selectedOpen = false
+                setTimeout(open, 10)
             } else {
-            open()
+                open()
             }
 
             nativeEvent.stopPropagation()
@@ -191,12 +191,12 @@ export default {
             const second = new Date(first.getTime() + secondTimestamp)
 
             events.push({
-                name: this.names[this.rnd(0, this.names.length - 1)],
-                start: first,
-                end: second,
-                color: this.colors[this.rnd(0, this.colors.length - 1)],
-                timed: !allDay,
-            })
+                    name: this.names[this.rnd(0, this.names.length - 1)],
+                    start: first,
+                    end: second,
+                    color: this.colors[this.rnd(0, this.colors.length - 1)],
+                    timed: !allDay,
+                })
             }
 
             this.events = events
