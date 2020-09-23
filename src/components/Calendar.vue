@@ -58,44 +58,43 @@
           @click:date="viewDay"
           @change="updateRange"
         ></v-calendar>
-        <v-menu
-          v-model="selectedOpen"
-          :close-on-content-click="false"
-          :activator="selectedElement"
-          offset-x
-        >
-          <v-card
-            color="grey lighten-4"
-            min-width="350px"
-            flat
-          >
+        <v-menu v-model="selectedOpen"
+                :close-on-content-click="false"
+                :activator="selectedElement"
+                offset-x>
+          <v-card color="grey lighten-4"
+                  min-width="350px"
+                  flat>
             <v-toolbar
               :color="selectedEvent.color"
-              dark
-            >
-              <v-btn icon>
-                <v-icon>mdi-pencil</v-icon>
+              dark>
+              <v-btn @click="deleteEvent(selectedEvent.id)" icon>
+                <v-icon>mdi-delete</v-icon>
               </v-btn>
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-btn icon>
-                <v-icon>mdi-heart</v-icon>
-              </v-btn>
-              <v-btn icon>
-                <v-icon>mdi-dots-vertical</v-icon>
-              </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span v-html="selectedEvent.details"></span>
+              <form v-if="currentlyEditing !== selectedEvent.id">
+                {{selectedEvent.details}}
+              </form>
+              <form v-else>
+                <textarea-autosize
+                  v-model="selectedEvent.details"
+                  type="text"
+                  style="width: 100%"
+                  :min-height="100"
+                  placeholder="add note"
+                ></textarea-autosize>
+              </form>
             </v-card-text>
             <v-card-actions>
-              <v-btn
-                text
-                color="secondary"
-                @click="selectedOpen = false"
-              >
-                Cancel
-              </v-btn>
+              <v-btn text color="secondary"
+                @click="selectedOpen = false">Close</v-btn>
+              <v-btn v-if="currentlyEditing !== selectedEvent.id"
+              @click.prevent="editEvent(selectedEvent)">Edit</v-btn>
+              <v-btn v-else
+              @click.prevent="updateEvent(selectedEvent)">Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -143,6 +142,18 @@ export default {
             })
             this.events = events
         },
+        async updateEvent (event) {
+          await db.collection('calEvent').doc(this.currentlyEditing).update({
+            details: event.details
+          })
+          this.selectedOpen = false
+          this.currentlyEditing = null
+        },
+        async deleteEvent (event) {
+          await db.collection('calEvent').doc(event).delete()
+          this.selectedOpen = false
+          this.getEvents()
+        },
         viewDay ({ date }) {
             this.focus = date
             this.type = 'day'
@@ -158,6 +169,9 @@ export default {
         },
         next () {
             this.$refs.calendar.next()
+        },
+        editEvent (selectedEvent) {
+          this.currentlyEditing = selectedEvent.id
         },
         showEvent ({ nativeEvent, event }) {
             const open = () => {
